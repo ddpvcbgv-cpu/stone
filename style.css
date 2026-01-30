@@ -157,6 +157,36 @@ p {
 }
 
 /* Intro Text Animation */
+.intro-text h2 {
+    font-size: 1.15rem;
+    /* Reduced font size */
+    line-height: 2.2;
+    /* Generous line height for "poetic" feel */
+    font-weight: 500;
+    color: #e2e8f0;
+    word-break: keep-all;
+    text-shadow: none;
+    /* Clean text */
+}
+
+.intro-text h2 strong {
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.intro-text h2 .intro-emphasis {
+    font-size: 2.3rem;
+    /* 2x larger */
+    display: block;
+    font-weight: 600;
+    color: #fff;
+    margin: 0.5rem 0;
+}
+
+.intro-text {
+    padding: 0 1rem;
+}
+
 .fade-in {
     animation: textFadeIn 1.5s ease forwards;
 }
