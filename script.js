@@ -980,7 +980,7 @@ function showPTResult() {
 
                 <div class="pt-list" style="display: flex; flex-direction: column; gap: 3rem;">
                     ${MOCK_RESULT.pt.routines.map(routine => `
-                        <div style="background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.2) 100%); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent-color);">
+                        <div style="padding: 2rem 0; border-left: 4px solid var(--accent-color); padding-left: 1.5rem;">
                             <h4 style="font-size: 1.4rem; margin-bottom: 1rem; color: #fff;">${routine.title}</h4>
                             <p style="font-size: 1rem; color: #94a3b8; margin-bottom: 1.5rem; line-height: 1.6;">${routine.desc}</p>
                             <ul style="list-style: none; padding: 0;">
@@ -995,7 +995,7 @@ function showPTResult() {
                     `).join('')}
                 </div>
 
-                <div style="margin-top: 4rem; background: rgba(59, 130, 246, 0.1); padding: 2.5rem; border-radius: 12px; border: 1px solid #3b82f6;">
+                <div style="margin-top: 4rem; padding: 2.5rem 0; border-left: 4px solid #3b82f6; padding-left: 1.5rem;">
                     <h3 style="font-size: 1.3rem; color: #60a5fa; margin-bottom: 1.5rem;">${MOCK_RESULT.pt.coachSummary.title}</h3>
                     <ul style="list-style: none; padding: 0;">
                         ${MOCK_RESULT.pt.coachSummary.items.map(item => `<li style="margin-bottom: 1rem; color: #bfdbfe; font-size: 1.1rem;">${item}</li>`).join('')}
