@@ -250,11 +250,20 @@ p {
     font-weight: 500;
 }
 
-.option-btn:hover {
+/* Only apply hover effects on devices with fine pointer (desktop) */
+@media (hover: hover) and (pointer: fine) {
+    .option-btn:hover {
+        background: var(--btn-hover);
+        border-color: var(--accent-color);
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(56, 189, 248, 0.1);
+    }
+}
+
+/* Active state for touch devices */
+.option-btn:active {
     background: var(--btn-hover);
     border-color: var(--accent-color);
-    transform: translateX(5px);
-    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.1);
 }
 
 /* Result Card */
