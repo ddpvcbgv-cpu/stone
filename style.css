@@ -183,6 +183,15 @@ p {
     margin: 0.5rem 0;
 }
 
+.intro-text h2 .intro-emphasis-small {
+    font-size: 1.6rem;
+    /* Slightly smaller than emphasis */
+    display: block;
+    font-weight: 600;
+    color: #fff;
+    margin: 0.5rem 0;
+}
+
 .intro-text {
     padding: 0 1rem;
 }

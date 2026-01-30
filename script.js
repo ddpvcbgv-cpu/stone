@@ -22,7 +22,7 @@ const auth = {
     SESSION_KEY: 'heartStone_session',
 
     // Initialize: Check for active session
-    init: function() {
+    init: function () {
         const session = localStorage.getItem(this.SESSION_KEY);
         if (session) {
             state.user = JSON.parse(session);
@@ -34,81 +34,81 @@ const auth = {
     },
 
     // Login (Email or Social)
-    login: function(user) {
+    login: function (user) {
         state.user = user;
         state.isLoggedIn = true;
         localStorage.setItem(this.SESSION_KEY, JSON.stringify(user));
         this.updateHeader();
-        
+
         // Load saved progress for this user
         this.loadUserProgress();
-        
+
         closeModal('login-modal');
         alert(`${user.name}님, 환영합니다!`);
-        
+
         // Redirect logic: If data exists, go to extended test
         if (state.extendedStep > 0 || Object.keys(state.extendedAnswers).length > 0) {
-            if(confirm("이전에 진행하던 검사 기록이 있습니다. 이어서 하시겠습니까?")) {
-               startExtendedTest();
+            if (confirm("이전에 진행하던 검사 기록이 있습니다. 이어서 하시겠습니까?")) {
+                startExtendedTest();
             }
         } else {
-             // New user: maybe skip intro?
-             // For now, let them stay on intro or whatever page they are on.
+            // New user: maybe skip intro?
+            // For now, let them stay on intro or whatever page they are on.
         }
     },
 
     // Signup (Email)
-    signup: function(name, email, password) {
+    signup: function (name, email, password) {
         const users = JSON.parse(localStorage.getItem(this.USERS_KEY) || '[]');
         if (users.find(u => u.email === email)) {
             alert('이미 가입된 이메일입니다.');
             return false;
         }
-        
+
         const newUser = { name, email, password, provider: 'email' };
         users.push(newUser);
         localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
-        
+
         alert('가입이 완료되었습니다! 로그인해주세요.');
         switchModal('login');
         return true;
     },
 
     // Logout
-    logout: function() {
-        if(confirm("로그아웃 하시겠습니까?")) {
+    logout: function () {
+        if (confirm("로그아웃 하시겠습니까?")) {
             localStorage.removeItem(this.SESSION_KEY);
             state.user = null;
             state.isLoggedIn = false;
-            
+
             // Reset state
             state.extendedStep = 0;
             state.extendedAnswers = {};
-            
+
             this.updateHeader();
             alert("로그아웃 되었습니다.");
-            location.reload(); 
+            location.reload();
         }
     },
 
     // Update Header UI
-    updateHeader: function() {
+    updateHeader: function () {
         const btn = document.getElementById('auth-btn');
         if (state.isLoggedIn) {
             btn.textContent = `마이페이지 (${state.user.name})`;
             btn.onclick = () => {
                 // Simple My Page Action: Show Logout for MVP
                 // Ideally this opens a dropdown or My Page modal
-                auth.logout(); 
+                auth.logout();
             };
         } else {
             btn.textContent = `로그인 / 회원가입`;
             btn.onclick = openLoginModal;
         }
     },
-    
+
     // Save Progress (Auto-save)
-    saveUserProgress: function() {
+    saveUserProgress: function () {
         if (!state.isLoggedIn) return;
         const key = `heartStone_progress_${state.user.email}`;
         const data = {
@@ -117,9 +117,9 @@ const auth = {
         };
         localStorage.setItem(key, JSON.stringify(data));
     },
-    
+
     // Load Progress
-    loadUserProgress: function() {
+    loadUserProgress: function () {
         if (!state.isLoggedIn) return;
         const key = `heartStone_progress_${state.user.email}`;
         const saved = localStorage.getItem(key);
@@ -165,11 +165,11 @@ function handleEmailLogin(e) {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
-    
+
     // Check against mock DB
     const users = JSON.parse(localStorage.getItem(auth.USERS_KEY) || '[]');
     const user = users.find(u => u.email === email && u.password === password);
-    
+
     if (user) {
         auth.login({ name: user.name, email: user.email, provider: 'email' });
     } else {
@@ -182,7 +182,7 @@ function handleEmailSignup(e) {
     const name = document.getElementById('signup-name').value;
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
-    
+
     auth.signup(name, email, password);
 }
 
@@ -231,7 +231,7 @@ function renderQuestion(qIndex) {
             </div>
             <div class="option-list">
                 ${question.options.map((opt, idx) => `
-                    <button class="option-btn" onclick="handleAnswer('${question.id}', ${opt.value})">
+                    <button class="option-btn" id="q${qIndex}-opt${idx}" onclick="handleAnswer('${question.id}', ${opt.value})">
                         ${idx + 1}. ${opt.text}
                     </button>
                 `).join('')}
@@ -240,11 +240,22 @@ function renderQuestion(qIndex) {
         </div>
     `;
     dom.container.innerHTML = html;
+
+    // Force blur any active element to prevent state persistence
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
 }
 
 function handleAnswer(type, value) {
     state.scores[type] = value;
     state.step++;
+
+    // Remove focus from clicked button
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     setTimeout(() => {
         renderQuestion(state.step - 4);
     }, 200);
@@ -326,7 +337,7 @@ function startExtendedTest() {
     document.body.style.overflow = "auto";
     document.body.style.alignItems = "flex-start";
     dom.container.style.maxWidth = "800px";
-    
+
     // Load progress if logged in, otherwise reset/keep logic
     if (state.isLoggedIn) {
         auth.loadUserProgress();
@@ -338,10 +349,10 @@ function startExtendedTest() {
         // If we want resume capability from result page, we should check there.
         // For simplified logic: Just let `state` be what it is.
         if (state.extendedStep === 0 && Object.keys(state.extendedAnswers).length === 0) {
-             resetExtendedState();
+            resetExtendedState();
         }
     }
-    
+
     state.mode = 'extended';
     renderExtendedPage();
 }
