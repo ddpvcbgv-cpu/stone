@@ -5,7 +5,9 @@ const state = {
     scores: { S: 0, C: 0, T: 0, D: 0, F: 0, E: 0 },
     extendedStep: 0,
     extendedAnswers: {},
-    mode: 'normal'
+    mode: 'normal',
+    user: null, // { email, name, provider }
+    isLoggedIn: false
 };
 
 const dom = {
@@ -13,8 +15,181 @@ const dom = {
     app: document.getElementById('app')
 };
 
+// --- Authentication Logic ---
+const auth = {
+    // Keys for localStorage
+    USERS_KEY: 'heartStone_users',
+    SESSION_KEY: 'heartStone_session',
+
+    // Initialize: Check for active session
+    init: function() {
+        const session = localStorage.getItem(this.SESSION_KEY);
+        if (session) {
+            state.user = JSON.parse(session);
+            state.isLoggedIn = true;
+            this.updateHeader();
+            return true;
+        }
+        return false;
+    },
+
+    // Login (Email or Social)
+    login: function(user) {
+        state.user = user;
+        state.isLoggedIn = true;
+        localStorage.setItem(this.SESSION_KEY, JSON.stringify(user));
+        this.updateHeader();
+        
+        // Load saved progress for this user
+        this.loadUserProgress();
+        
+        closeModal('login-modal');
+        alert(`${user.name}님, 환영합니다!`);
+        
+        // Redirect logic: If data exists, go to extended test
+        if (state.extendedStep > 0 || Object.keys(state.extendedAnswers).length > 0) {
+            if(confirm("이전에 진행하던 검사 기록이 있습니다. 이어서 하시겠습니까?")) {
+               startExtendedTest();
+            }
+        } else {
+             // New user: maybe skip intro?
+             // For now, let them stay on intro or whatever page they are on.
+        }
+    },
+
+    // Signup (Email)
+    signup: function(name, email, password) {
+        const users = JSON.parse(localStorage.getItem(this.USERS_KEY) || '[]');
+        if (users.find(u => u.email === email)) {
+            alert('이미 가입된 이메일입니다.');
+            return false;
+        }
+        
+        const newUser = { name, email, password, provider: 'email' };
+        users.push(newUser);
+        localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+        
+        alert('가입이 완료되었습니다! 로그인해주세요.');
+        switchModal('login');
+        return true;
+    },
+
+    // Logout
+    logout: function() {
+        if(confirm("로그아웃 하시겠습니까?")) {
+            localStorage.removeItem(this.SESSION_KEY);
+            state.user = null;
+            state.isLoggedIn = false;
+            
+            // Reset state
+            state.extendedStep = 0;
+            state.extendedAnswers = {};
+            
+            this.updateHeader();
+            alert("로그아웃 되었습니다.");
+            location.reload(); 
+        }
+    },
+
+    // Update Header UI
+    updateHeader: function() {
+        const btn = document.getElementById('auth-btn');
+        if (state.isLoggedIn) {
+            btn.textContent = `마이페이지 (${state.user.name})`;
+            btn.onclick = () => {
+                // Simple My Page Action: Show Logout for MVP
+                // Ideally this opens a dropdown or My Page modal
+                auth.logout(); 
+            };
+        } else {
+            btn.textContent = `로그인 / 회원가입`;
+            btn.onclick = openLoginModal;
+        }
+    },
+    
+    // Save Progress (Auto-save)
+    saveUserProgress: function() {
+        if (!state.isLoggedIn) return;
+        const key = `heartStone_progress_${state.user.email}`;
+        const data = {
+            extendedStep: state.extendedStep,
+            extendedAnswers: state.extendedAnswers
+        };
+        localStorage.setItem(key, JSON.stringify(data));
+    },
+    
+    // Load Progress
+    loadUserProgress: function() {
+        if (!state.isLoggedIn) return;
+        const key = `heartStone_progress_${state.user.email}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+            const data = JSON.parse(saved);
+            state.extendedStep = data.extendedStep || 0;
+            state.extendedAnswers = data.extendedAnswers || {};
+        }
+    }
+};
+
+// --- Modal Helpers ---
+function openLoginModal() {
+    document.getElementById('login-modal').classList.remove('hidden');
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+}
+
+function switchModal(target) {
+    if (target === 'signup') {
+        closeModal('login-modal');
+        document.getElementById('signup-modal').classList.remove('hidden');
+    } else {
+        closeModal('signup-modal');
+        document.getElementById('login-modal').classList.remove('hidden');
+    }
+}
+
+// --- Auth Handlers ---
+function handleSocialLogin(provider) {
+    // Mock Social Login
+    const mockUser = {
+        name: `${provider} 사용자`,
+        email: `user@${provider.toLowerCase()}.com`,
+        provider: provider
+    };
+    auth.login(mockUser);
+}
+
+function handleEmailLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    // Check against mock DB
+    const users = JSON.parse(localStorage.getItem(auth.USERS_KEY) || '[]');
+    const user = users.find(u => u.email === email && u.password === password);
+    
+    if (user) {
+        auth.login({ name: user.name, email: user.email, provider: 'email' });
+    } else {
+        alert('이메일 또는 비밀번호가 일치하지 않습니다.');
+    }
+}
+
+function handleEmailSignup(e) {
+    e.preventDefault();
+    const name = document.getElementById('signup-name').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    
+    auth.signup(name, email, password);
+}
+
+
 // --- Initialization ---
 function init() {
+    auth.init(); // Check session on load
     renderIntro(0);
     dom.container.addEventListener('click', handleIntroClick);
 }
@@ -151,10 +326,22 @@ function startExtendedTest() {
     document.body.style.overflow = "auto";
     document.body.style.alignItems = "flex-start";
     dom.container.style.maxWidth = "800px";
-
-    // Reset state for demo purposes
-    resetExtendedState();
-
+    
+    // Load progress if logged in, otherwise reset/keep logic
+    if (state.isLoggedIn) {
+        auth.loadUserProgress();
+    } else {
+        // Only reset if not logged in (anonymous mostly starts fresh or keeps session session state?)
+        // For MVP, if not logged in, we reset to be safe or maybe keep it.
+        // Let's keep existing logic: reset if fresh start is requested.
+        // But `startExtendedTest` implies starting. 
+        // If we want resume capability from result page, we should check there.
+        // For simplified logic: Just let `state` be what it is.
+        if (state.extendedStep === 0 && Object.keys(state.extendedAnswers).length === 0) {
+             resetExtendedState();
+        }
+    }
+    
     state.mode = 'extended';
     renderExtendedPage();
 }
@@ -162,7 +349,9 @@ function startExtendedTest() {
 function resetExtendedState() {
     state.extendedStep = 0;
     state.extendedAnswers = {};
-    localStorage.removeItem('heartStone_extended_state');
+    // Do NOT clear localStorage for user here, only when they explicitly restart?
+    // Actually, removal from storage happens on completion or explicit reset.
+    // prompt user? 
 }
 
 function renderExtendedPage(scrollTop = true) {
@@ -220,6 +409,7 @@ function renderExtendedPage(scrollTop = true) {
 function handleExtendedChoice(qId, btnElement) {
     const value = btnElement.getAttribute('data-val');
     state.extendedAnswers[qId] = value;
+    auth.saveUserProgress(); // Auto-save
     const buttons = document.getElementsByClassName(`extended-option-btn-${qId}`);
     for (let btn of buttons) {
         if (btn === btnElement) {
@@ -236,10 +426,12 @@ function handleExtendedChoice(qId, btnElement) {
 
 function handleExtendedText(qId, value) {
     state.extendedAnswers[qId] = value;
+    auth.saveUserProgress(); // Auto-save
 }
 
 function nextExtendedPage() {
     state.extendedStep++;
+    auth.saveUserProgress(); // Auto-save step
     const questionsPerPage = 10;
     const totalPages = Math.ceil(DATA.extended_questions.length / questionsPerPage);
     if (state.extendedStep >= totalPages) submitExtendedTest();
@@ -686,8 +878,11 @@ const MOCK_RESULT = {
 };
 
 function showEssayResult() {
+    // Force container to be wide enough for text but centered
+    dom.container.style.maxWidth = "800px";
+
     let html = `
-        <div class="result-card slide-up" style="max-width: 800px; margin: 0 auto; padding-bottom: 4rem;">
+        <div class="fullscreen-result" style="padding-bottom: 6rem;">
             <div style="text-align: center; margin-bottom: 3rem;">
                 <span style="background: rgba(255,255,255,0.1); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; margin-bottom: 1rem; display: inline-block;">AI Mind Analysis</span>
                 <h2 style="color: #fff; font-size: 1.8rem; margin-bottom: 0.5rem; font-family: 'Noto Serif KR', serif;">${MOCK_RESULT.essay.title}</h2>
@@ -759,7 +954,7 @@ function renderEssaySection(part) {
 
 function showPTResult() {
     let html = `
-        <div class="result-card slide-up" style="max-width: 800px; margin: 0 auto;">
+        <div class="fullscreen-result" style="padding-bottom: 6rem;">
             <div style="text-align: center; margin-bottom: 3rem;">
                 <span style="background: var(--accent-color); color: #0f172a; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-bottom: 1rem; display: inline-block;">ACTION PLAN</span>
                 <h2 style="color: #fff; font-size: 2rem; margin-bottom: 0.5rem;">${MOCK_RESULT.pt.title}</h2>

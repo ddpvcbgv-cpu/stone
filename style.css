@@ -367,8 +367,252 @@ p {
         transform: translateY(30px);
     }
 
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Fullscreen Result Mode (No Frame) */
+.fullscreen-result {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    animation: slideUp 0.8s ease forwards;
+}
+
+
+.fullscreen-result .result-header {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fullscreen-result .essay-content,
+.fullscreen-result .pt-content {
+    text-align: justify;
+    padding: 0 1rem;
+    /* Add side padding for readability on mobile */
+}
+
+.fullscreen-result h1,
+.fullscreen-result h2,
+.fullscreen-result h3,
+.fullscreen-result .result-header {
+    text-align: center;
+    /* Keep headers centered */
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    #content-container {
+        padding: 1.5rem;
+        max-width: 100% !important;
+        /* Force full width on mobile */
+    }
+
+    .intro-text h2 {
+        font-size: 1.5rem;
+    }
+
+    .question-title {
+        font-size: 1.2rem;
+    }
+
+    .type-name {
+        font-size: 1.8rem;
+    }
+}
+
+/* Authentication UI Styles */
+
+/* Header */
+#main-header {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+#auth-btn {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s;
+    font-size: 0.9rem;
+}
+
+#auth-btn:hover {
+    background: var(--accent-color);
+    color: #0f172a;
+    font-weight: bold;
+}
+
+/* Modals */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal.hidden {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-content {
+    background: #1e293b;
+    padding: 2.5rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.5rem;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: #fff;
+}
+
+.modal-content h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: white;
+}
+
+/* Form Elements */
+input {
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--accent-color);
+    color: #0f172a;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: transform 0.2s;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Social Login */
+.social-login {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.social-btn {
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+.social-btn.kakao {
+    background: #FEE500;
+    color: #000000;
+}
+
+.social-btn.google {
+    background: #ffffff;
+    color: #000000;
+}
+
+.social-btn:hover {
+    filter: brightness(0.95);
+}
+
+/* Divider */
+.divider {
+    text-align: center;
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+.divider::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.divider span {
+    background: #1e293b;
+    padding: 0 10px;
+    position: relative;
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.auth-link a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 5px;
 }

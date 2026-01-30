@@ -21,9 +21,47 @@
             <div class="overlay"></div>
         </div>
 
+        <!-- My Page Header -->
+        <header id="main-header">
+            <button id="auth-btn" onclick="openLoginModal()">로그인 / 회원가입</button>
+        </header>
+
         <main id="content-container">
             <!-- Dynamic Content will be injected here -->
         </main>
+
+        <!-- Auth Modals -->
+        <div id="login-modal" class="modal hidden">
+            <div class="modal-content slide-up">
+                <span class="close-btn" onclick="closeModal('login-modal')">&times;</span>
+                <h2>로그인</h2>
+                <div class="social-login">
+                    <button class="social-btn kakao" onclick="handleSocialLogin('Kakao')">🟡 카카오로 3초 만에 시작하기</button>
+                    <button class="social-btn google" onclick="handleSocialLogin('Google')">⚪ 구글로 계속하기</button>
+                </div>
+                <div class="divider"><span>또는 이메일로 로그인</span></div>
+                <form id="login-form" onsubmit="handleEmailLogin(event)">
+                    <input type="email" id="login-email" placeholder="이메일 주소" required>
+                    <input type="password" id="login-password" placeholder="비밀번호" required>
+                    <button type="submit" class="submit-btn">로그인</button>
+                </form>
+                <p class="auth-link">계정이 없으신가요? <a href="#" onclick="switchModal('signup')">회원가입</a></p>
+            </div>
+        </div>
+
+        <div id="signup-modal" class="modal hidden">
+            <div class="modal-content slide-up">
+                <span class="close-btn" onclick="closeModal('signup-modal')">&times;</span>
+                <h2>회원가입</h2>
+                <form id="signup-form" onsubmit="handleEmailSignup(event)">
+                    <input type="text" id="signup-name" placeholder="이름 (닉네임)" required>
+                    <input type="email" id="signup-email" placeholder="이메일 주소" required>
+                    <input type="password" id="signup-password" placeholder="비밀번호 (6자 이상)" minlength="6" required>
+                    <button type="submit" class="submit-btn">가입하고 시작하기</button>
+                </form>
+                <p class="auth-link">이미 계정이 있으신가요? <a href="#" onclick="switchModal('login')">로그인</a></p>
+            </div>
+        </div>
     </div>
 
     <script src="data.js"></script>
